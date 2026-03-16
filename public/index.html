@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeBoard - Brain-Saving Dashboard</title>
+    <meta name="description" content="Visual reminders that actually grab your attention. Never forget a bill, appointment, or expiration date again.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-dark: #2b1a14;
+            --bg-card: #3d2a22;
+            --bg-lighter: #4a3830;
+            --pink: #ff9ad5;
+            --blue: #8fdcff;
+            --white: #fff;
+            --gray: #a89890;
+            --red: #ff6b6b;
+            --orange: #ffa94d;
+            --yellow: #ffd43b;
+            --green: #69db7c;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--white);
+            min-height: 100vh;
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a0f0a 100%);
+        }
+        
+        .login-logo {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .login-title {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pink), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: var(--gray);
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+        
+        .login-box {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 30px;
+            background: var(--bg-lighter);
+            border-radius: 12px;
+            padding: 5px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: var(--pink);
+            color: var(--bg-dark);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--bg-lighter);
+            border-radius: 12px;
+            background: var(--bg-dark);
+            color: var(--white);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--pink);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-pink {
+            background: linear-gradient(135deg, var(--pink), #ff7ac6);
+            color: var(--bg-dark);
+        }
+        
+        .btn-blue {
+            background: linear-gradient(135deg, var(--blue), #6bc9f7);
+            color: var(--bg-dark);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 154, 213, 0.3);
+        }
+        
+        .error-msg {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--red);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: var(--bg-card);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--bg-lighter);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-logo {
+            font-size: 32px;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pink), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            color: var(--gray);
+        }
+        
+        .logout-btn {
+            background: var(--bg-lighter);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: var(--red);
+        }
+        
+        .main-content {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.overdue {
+            border: 2px solid var(--red);
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 107, 107, 0.2); }
+        }
+        
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        /* Rage Meter */
+        .rage-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .rage-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .rage-bar-container {
+            background: var(--bg-lighter);
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .rage-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s, background 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .rage-bar.low { background: var(--green); }
+        .rage-bar.medium { background: var(--yellow); color: var(--bg-dark); }
+        .rage-bar.high { background: var(--orange); color: var(--bg-dark); }
+        .rage-bar.critical { background: var(--red); animation: shake 0.5s infinite; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Quick Add */
+        .quick-add-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .category-btn {
+            background: var(--bg-lighter);
+            border: 2px solid transparent;
+            padding: 15px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-btn:hover {
+            border-color: var(--pink);
+            transform: translateY(-3px);
+        }
+        
+        .category-btn .icon {
+            font-size: 28px;
+        }
+        
+        .category-btn .label {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        /* Reminders List */
+        .reminders-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            background: var(--bg-lighter);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .filter-tab.active {
+            background: var(--blue);
+            color: var(--bg-dark);
+            font-weight: 600;
+        }
+        
+        .reminder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .reminder-card {
+            background: var(--bg-lighter);
+            padding: 20px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--green);
+        }
+        
+        .reminder-card.due-soon {
+            border-left-color: var(--yellow);
+        }
+        
+        .reminder-card.due-today {
+            border-left-color: var(--orange);
+            animation: glow-orange 2s infinite;
+        }
+        
+        .reminder-card.overdue {
+            border-left-color: var(--red);
+            animation: glow-red 1s infinite;
+        }
+        
+        @keyframes glow-orange {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 169, 77, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 169, 77, 0.5); }
+        }
+        
+        @keyframes glow-red {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 107, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); }
+        }
+        
+        .reminder-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+        
+        .reminder-content {
+            flex: 1;
+        }
+        
+        .reminder-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .reminder-fun-msg {
+            color: var(--pink);
+            font-size: 14px;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+        
+        .reminder-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .reminder-date {
+            color: var(--gray);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .reminder-recurring {
+            background: var(--blue);
+            color: var(--bg-dark);
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .reminder-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .action-btn {
+            background: var(--bg-card);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .action-btn.complete:hover {
+            background: var(--green);
+        }
+        
+        .action-btn.delete:hover {
+            background: var(--red);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .modal-close {
+            background: var(--bg-lighter);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--white);
+        }
+        
+        .modal-close:hover {
+            background: var(--red);
+        }
+        
+        .selected-category {
+            background: var(--bg-lighter);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .selected-category .icon {
+            font-size: 40px;
+        }
+        
+        .selected-category .name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--bg-lighter);
+            border-radius: 12px;
+            background: var(--bg-dark);
+            color: var(--white);
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--pink);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--bg-lighter);
+            border-radius: 12px;
+            background: var(--bg-dark);
+            color: var(--white);
+            font-size: 16px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--pink);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .reminder-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .reminder-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .login-title {
+                font-size: 32px;
+            }
+            
+            .login-box {
+                padding: 25px;
+            }
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--bg-lighter);
+            border-top-color: var(--pink);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-logo">🧠</div>
+        <h1 class="login-title">LifeBoard</h1>
+        <p class="login-subtitle">Brain-Saving Dashboard</p>
+        
+        <div class="login-box">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showLoginTab('login')">Login</button>
+                <button class="tab-btn" onclick="showLoginTab('register')">Sign Up</button>
+            </div>
+            
+            <div class="error-msg" id="errorMsg"></div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-pink">Login</button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>Name</label>
+                    <input type="text" id="registerName" placeholder="Your Name" required>
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" minlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-blue">Create Account</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <header class="header">
+            <div class="header-left">
+                <span class="header-logo">🧠</span>
+                <span class="header-title">LifeBoard</span>
+            </div>
+            <div class="user-info">
+                <span class="user-name" id="userName">Welcome!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card overdue" id="statOverdue">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="overdueCount">0</div>
+                    <div class="stat-label">Overdue</div>
+                </div>
+                <div class="stat-card" id="statToday">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-number" id="todayCount">0</div>
+                    <div class="stat-label">Due Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📆</div>
+                    <div class="stat-number" id="weekCount">0</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✨</div>
+                    <div class="stat-number" id="upcomingCount">0</div>
+                    <div class="stat-label">Upcoming</div>
+                </div>
+            </div>
+            
+            <!-- Rage Meter -->
+            <div class="rage-section">
+                <div class="rage-title">
+                    <span>😤</span>
+                    <span>Renewal Rage Meter</span>
+                </div>
+                <div class="rage-bar-container">
+                    <div class="rage-bar low" id="rageBar" style="width: 0%;">
+                        <span id="rageText">Zen Mode 🧘</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Add -->
+            <div class="quick-add-section">
+                <h2 class="section-title">⚡ Quick Add</h2>
+                <div class="category-grid">
+                    <button class="category-btn" onclick="openAddModal('bills')">
+                        <span class="icon">💰</span>
+                        <span class="label">Bills</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('subscriptions')">
+                        <span class="icon">📺</span>
+                        <span class="label">Subscriptions</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('car')">
+                        <span class="icon">🚗</span>
+                        <span class="label">Car</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('pets')">
+                        <span class="icon">🐕</span>
+                        <span class="label">Pets</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('health')">
+                        <span class="icon">💊</span>
+                        <span class="label">Health</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('documents')">
+                        <span class="icon">📄</span>
+                        <span class="label">Documents</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('birthdays')">
+                        <span class="icon">🎂</span>
+                        <span class="label">Birthdays</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('home')">
+                        <span class="icon">🏠</span>
+                        <span class="label">Home</span>
+                    </button>
+                    <button class="category-btn" onclick="openAddModal('other')">
+                        <span class="icon">📌</span>
+                        <span class="label">Other</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Reminders List -->
+            <div class="reminders-section">
+                <h2 class="section-title">📋 Your Reminders</h2>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterReminders('all')">All</button>
+                    <button class="filter-tab" onclick="filterReminders('overdue')">🔥 Overdue</button>
+                    <button class="filter-tab" onclick="filterReminders('today')">Today</button>
+                    <button class="filter-tab" onclick="filterReminders('week')">This Week</button>
+                    <button class="filter-tab" onclick="filterReminders('bills')">💰 Bills</button>
+                    <button class="filter-tab" onclick="filterReminders('subscriptions')">📺 Subs</button>
+                    <button class="filter-tab" onclick="filterReminders('health')">💊 Health</button>
+                </div>
+                <div class="reminder-list" id="reminderList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Reminder Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Reminder</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <div class="selected-category" id="selectedCategory">
+                <span class="icon">💰</span>
+                <span class="name">Bills</span>
+            </div>
+            
+            <form onsubmit="addReminder(event)">
+                <div class="input-group">
+                    <label>What needs attention?</label>
+                    <input type="text" id="reminderTitle" placeholder="e.g., Netflix subscription, Car insurance" required>
+                </div>
+                <div class="input-group">
+                    <label>Due Date</label>
+                    <input type="date" id="reminderDate" required>
+                </div>
+                <div class="input-group">
+                    <label>Recurring?</label>
+                    <select id="reminderRecurring">
+                        <option value="none">One-time only</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="reminderNotes" placeholder="Any extra details..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-pink">Add Reminder 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let token = localStorage.getItem('lifeboard_token');
+        let user = null;
+        let reminders = [];
+        let currentFilter = 'all';
+        let selectedCategory = 'bills';
+        
+        // Category config
+        const categories = {
+            bills: { icon: '💰', name: 'Bills' },
+            subscriptions: { icon: '📺', name: 'Subscriptions' },
+            car: { icon: '🚗', name: 'Car' },
+            pets: { icon: '🐕', name: 'Pets' },
+            health: { icon: '💊', name: 'Health' },
+            documents: { icon: '📄', name: 'Documents' },
+            birthdays: { icon: '🎂', name: 'Birthdays' },
+            home: { icon: '🏠', name: 'Home' },
+            other: { icon: '📌', name: 'Other' }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                checkAuth();
+            }
+            // Set min date to today
+            document.getElementById('reminderDate').min = new Date().toISOString().split('T')[0];
+        });
+        
+        // Auth check
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    user = await res.json();
+                    showDashboard();
+                } else {
+                    logout();
+                }
+            } catch (err) {
+                logout();
+            }
+        }
+        
+        // Show/hide screens
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('userName').textContent = `Welcome, ${user.name}!`;
+            loadReminders();
+            loadStats();
+        }
+        
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+        
+        // Tab switching
+        function showLoginTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+        
+        // Show error
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        
+        // Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.token;
+                    user = data.user;
+                    localStorage.setItem('lifeboard_token', token);
+                    showDashboard();
+                } else {
+                    showError(data.error || 'Login failed');
+                }
+            } catch (err) {
+                showError('Connection error');
+            }
+        }
+        
+        // Register
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.token;
+                    user = data.user;
+                    localStorage.setItem('lifeboard_token', token);
+                    showDashboard();
+                } else {
+                    showError(data.error || 'Registration failed');
+                }
+            } catch (err) {
+                showError('Connection error');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            token = null;
+            user = null;
+            localStorage.removeItem('lifeboard_token');
+            showLogin();
+        }
+        
+        // Load reminders
+        async function loadReminders() {
+            try {
+                const res = await fetch('/api/reminders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                reminders = await res.json();
+                renderReminders();
+            } catch (err) {
+                console.error('Failed to load reminders:', err);
+            }
+        }
+        
+        // Load stats
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const stats = await res.json();
+                
+                document.getElementById('overdueCount').textContent = stats.overdue;
+                document.getElementById('todayCount').textContent = stats.dueToday;
+                document.getElementById('weekCount').textContent = stats.dueThisWeek;
+                document.getElementById('upcomingCount').textContent = stats.upcoming;
+                
+                // Toggle overdue card animation
+                const overdueCard = document.getElementById('statOverdue');
+                if (stats.overdue === 0) {
+                    overdueCard.classList.remove('overdue');
+                } else {
+                    overdueCard.classList.add('overdue');
+                }
+                
+                // Update rage meter
+                updateRageMeter(stats.rageMeter);
+            } catch (err) {
+                console.error('Failed to load stats:', err);
+            }
+        }
+        
+        // Update rage meter
+        function updateRageMeter(value) {
+            const bar = document.getElementById('rageBar');
+            const text = document.getElementById('rageText');
+            
+            bar.style.width = `${Math.max(10, value)}%`;
+            bar.className = 'rage-bar';
+            
+            if (value === 0) {
+                bar.classList.add('low');
+                text.textContent = 'Zen Mode 🧘';
+            } else if (value <= 25) {
+                bar.classList.add('low');
+                text.textContent = 'All Good 😊';
+            } else if (value <= 50) {
+                bar.classList.add('medium');
+                text.textContent = 'Getting Busy 😅';
+            } else if (value <= 75) {
+                bar.classList.add('high');
+                text.textContent = 'Uh Oh! 😰';
+            } else {
+                bar.classList.add('critical');
+                text.textContent = 'PANIC MODE! 🔥';
+            }
+        }
+        
+        // Render reminders
+        function renderReminders() {
+            const list = document.getElementById('reminderList');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+            
+            // Filter
+            let filtered = reminders.filter(r => !r.completed);
+            
+            if (currentFilter === 'overdue') {
+                filtered = filtered.filter(r => new Date(r.dueDate) < today);
+            } else if (currentFilter === 'today') {
+                filtered = filtered.filter(r => {
+                    const d = new Date(r.dueDate);
+                    d.setHours(0, 0, 0, 0);
+                    return d.getTime() === today.getTime();
+                });
+            } else if (currentFilter === 'week') {
+                filtered = filtered.filter(r => {
+                    const d = new Date(r.dueDate);
+                    return d >= today && d <= weekFromNow;
+                });
+            } else if (categories[currentFilter]) {
+                filtered = filtered.filter(r => r.category === currentFilter);
+            }
+            
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">✨</div>
+                        <h3>All caught up!</h3>
+                        <p>No reminders to show. Add one above!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = filtered.map(r => {
+                const dueDate = new Date(r.dueDate);
+                dueDate.setHours(0, 0, 0, 0);
+                const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                
+                let statusClass = '';
+                let dateDisplay = '';
+                
+                if (daysUntil < 0) {
+                    statusClass = 'overdue';
+                    dateDisplay = `🔥 ${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? 's' : ''} OVERDUE!`;
+                } else if (daysUntil === 0) {
+                    statusClass = 'due-today';
+                    dateDisplay = '⚡ DUE TODAY!';
+                } else if (daysUntil <= 3) {
+                    statusClass = 'due-soon';
+                    dateDisplay = `⏰ ${daysUntil} day${daysUntil !== 1 ? 's' : ''} left`;
+                } else {
+                    dateDisplay = `📅 ${dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+                }
+                
+                const cat = categories[r.category] || categories.other;
+                
+                return `
+                    <div class="reminder-card ${statusClass}">
+                        <div class="reminder-icon">${cat.icon}</div>
+                        <div class="reminder-content">
+                            <div class="reminder-title">${r.title}</div>
+                            <div class="reminder-fun-msg">${r.funMessage}</div>
+                            <div class="reminder-meta">
+                                <span class="reminder-date">${dateDisplay}</span>
+                                ${r.recurring !== 'none' ? `<span class="reminder-recurring">🔄 ${r.recurring}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="reminder-actions">
+                            <button class="action-btn complete" onclick="completeReminder('${r._id}')" title="Mark complete">✓</button>
+                            <button class="action-btn delete" onclick="deleteReminder('${r._id}')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Filter reminders
+        function filterReminders(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            renderReminders();
+        }
+        
+        // Open add modal
+        function openAddModal(category) {
+            selectedCategory = category;
+            const cat = categories[category];
+            document.getElementById('selectedCategory').innerHTML = `
+                <span class="icon">${cat.icon}</span>
+                <span class="name">${cat.name}</span>
+            `;
+            document.getElementById('addModal').classList.add('active');
+            document.getElementById('reminderTitle').focus();
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('active');
+            document.getElementById('reminderTitle').value = '';
+            document.getElementById('reminderDate').value = '';
+            document.getElementById('reminderRecurring').value = 'none';
+            document.getElementById('reminderNotes').value = '';
+        }
+        
+        // Add reminder
+        async function addReminder(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('reminderTitle').value;
+            const dueDate = document.getElementById('reminderDate').value;
+            const recurring = document.getElementById('reminderRecurring').value;
+            const notes = document.getElementById('reminderNotes').value;
+            
+            try {
+                const res = await fetch('/api/reminders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        category: selectedCategory,
+                        dueDate,
+                        recurring,
+                        notes
+                    })
+                });
+                
+                if (res.ok) {
+                    closeModal();
+                    loadReminders();
+                    loadStats();
+                }
+            } catch (err) {
+                console.error('Failed to add reminder:', err);
+            }
+        }
+        
+        // Complete reminder
+        async function completeReminder(id) {
+            try {
+                const res = await fetch(`/api/reminders/${id}/complete`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    loadReminders();
+                    loadStats();
+                }
+            } catch (err) {
+                console.error('Failed to complete reminder:', err);
+            }
+        }
+        
+        // Delete reminder
+        async function deleteReminder(id) {
+            if (!confirm('Delete this reminder?')) return;
+            
+            try {
+                const res = await fetch(`/api/reminders/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    loadReminders();
+                    loadStats();
+                }
+            } catch (err) {
+                console.error('Failed to delete reminder:', err);
+            }
+        }
+        
+        // Close modal on outside click
+        document.getElementById('addModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addModal') closeModal();
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
