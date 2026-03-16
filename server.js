@@ -1,3 +1,4 @@
+javascript
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -43,7 +44,7 @@ const reminderSchema = new mongoose.Schema({
   notes: { type: String, default: '' },
   funMessage: { type: String, default: '' },
   completed: { type: Boolean, default: false },
-  notifiedDays: [{ type: Number }], // Track which day notifications were sent
+  notifiedDays: [{ type: Number }],
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -107,19 +108,16 @@ const funMessages = {
   ]
 };
 
-// Get random fun message
 function getRandomFunMessage(category) {
   const messages = funMessages[category] || funMessages.other;
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
-// JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'lifeboard-secret-key-2024';
+const JWT_SECRET = pro...RET || 'lifeboard-secret-key-2024';
 
-// Auth Middleware
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req...ion?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token provided' });
     
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -130,7 +128,6 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// Auth Routes
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -139,7 +136,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (existingUser) return res.status(400).json({ error: 'Email already registered' });
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, name });
+    const user = new User({ email, password: has...ord, name });
     await user.save();
     
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
@@ -175,7 +172,6 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
   }
 });
 
-// Reminder Routes
 app.get('/api/reminders', authMiddleware, async (req, res) => {
   try {
     const reminders = await Reminder.find({ userId: req.userId }).sort({ dueDate: 1 });
@@ -242,7 +238,6 @@ app.post('/api/reminders/:id/complete', authMiddleware, async (req, res) => {
     
     reminder.completed = true;
     
-    // If recurring, create next occurrence
     if (reminder.recurring !== 'none') {
       const nextDate = new Date(reminder.dueDate);
       if (reminder.recurring === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
@@ -268,7 +263,6 @@ app.post('/api/reminders/:id/complete', authMiddleware, async (req, res) => {
   }
 });
 
-// Dashboard stats
 app.get('/api/stats', authMiddleware, async (req, res) => {
   try {
     const now = new Date();
@@ -288,7 +282,6 @@ app.get('/api/stats', authMiddleware, async (req, res) => {
     }).length;
     const upcoming = reminders.filter(r => new Date(r.dueDate) > weekFromNow).length;
     
-    // Rage meter (0-100 based on overdue items)
     const rageMeter = Math.min(100, overdue * 25);
     
     res.json({
@@ -304,18 +297,14 @@ app.get('/api/stats', authMiddleware, async (req, res) => {
   }
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'LifeBoard', timestamp: new Date().toISOString() });
 });
 
-// Serve frontend
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root: './public' });
 });
 
-// Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`LifeBoard server running on port ${PORT}`);
 });
-
