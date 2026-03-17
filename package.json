@@ -1,12 +1,10 @@
-json
 {
   "name": "lifeboard",
   "version": "1.0.0",
-  "description": "Brain-Saving Dashboard - Visual reminders that grab attention",
+  "description": "Brain-Saving Dashboard",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18.0.0"
