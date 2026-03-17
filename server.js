@@ -1,8 +1,3 @@
-Go to github.com/taylormaebostic/LifeBoard
-Click on server.js
-Click the pencil icon (Edit) ✏️
-Delete EVERYTHING
-Paste this entire code:
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
